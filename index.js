@@ -16,7 +16,8 @@ function traceFsCalls() {
     try {
       const result = realFs[this.method].apply(fs, arguments);
       if (arguments.length > 0 && typeof arguments[0] === 'string' && arguments[0].indexOf(process.env.TRACEFS) >= 0 && arguments[0].indexOf('tracefs.log') < 0) {
-        const dumpedResult = this.method === 'watch' || result === undefined ? '' : ' = ' + JSON.stringify(result instanceof Buffer ? result.toString() : result);
+        const str = result.toString();
+        const dumpedResult = this.method === 'watch' || result === undefined ? '' : ' = ' + JSON.stringify(str.length > 255 ? str.slice(0, 20) + '...' : result);
         realFs.appendFileSync.apply(fs, [path.join(os.tmpdir(), 'tracefs.log'), this.method + ' ' + arguments[0] + dumpedResult + '\n']);
       }
       return result;
