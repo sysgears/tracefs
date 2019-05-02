@@ -1,0 +1,19 @@
+{
+  "name": "tracefs",
+  "version": "1.0.0",
+  "description": "Node fs calls tracer",
+  "author": "Victor Vlasenko <victor.vlasenko@sysgears.com>",
+  "main": "index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sysgears/tracefs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sysgears/tracefs/issues"
+  },
+  "homepage": "https://github.com/sysgears/tracefs/tree/master/packages/generator#readme",
+  "files": [
+    "index.js"
+  ]
+}
