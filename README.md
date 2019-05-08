@@ -18,6 +18,11 @@ TRACEFS=/foo node -r tracefs myprog
 And then check the output in
 `<tmpdir>/tracefs.log`
 
+You can also prepend substring with `console:` if you want to log calls to console instead of temporary file:
+```bash
+TRACEFS=console:/foo node -r tracefs myprog
+```
+
 ## License
 Copyright © 2019 [SysGears (Cyprus) Limited]. This source code is licensed under the [MIT] license.
 
