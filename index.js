@@ -1,6 +1,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const util = require('util');
 
 function traceFsCalls(traceSubstring, useConsole) {
   const realFs = {};
@@ -13,10 +14,32 @@ function traceFsCalls(traceSubstring, useConsole) {
   });
 
   function traceFsProxy() {
+    let hrTime = process.hrtime();
+    startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
     try {
-      let hrTime = process.hrtime();
-      startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
-      const startTime = process.hrtime();
+      if (['watch', 'watchFile'].indexOf(this.method) >= 0) {
+        const idx = ['undefined', 'function'].indexOf(typeof arguments[1]) >= 0 ? 1 : 2;
+        const listener = arguments[idx];
+        arguments[idx] = watchListener.bind({ method: this.method, filePath: arguments[0] });
+        function watchListener() {
+          let hrTime = process.hrtime();
+          startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
+          try {
+            if (listener) {
+              listener.apply(listener, arguments);
+            }
+          } finally {
+            hrTime = process.hrtime();
+            endTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
+            const msg = (endTimeUs - startTimeUs).toFixed(1) + ' us ' + this.method + '(' + this.filePath + ')->callback(' + util.inspect(Array.from(arguments), false, null) + ')';
+            if (useConsole) {
+              console.log(msg);
+            } else {
+              realFs.appendFileSync.apply(fs, [path.join(os.tmpdir(), 'tracefs.log'), msg + '\n']);
+            }
+          }
+        }
+      }
       const result = realFs[this.method].apply(fs, arguments);
       if (arguments.length > 0 && typeof arguments[0] === 'string' && arguments[0].indexOf(traceSubstring) >= 0 && arguments[0].indexOf('tracefs.log') < 0) {
         const str = result && result.toString();

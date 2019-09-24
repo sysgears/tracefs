@@ -1,6 +1,6 @@
 {
   "name": "tracefs",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Node fs calls tracer",
   "author": "Victor Vlasenko <victor.vlasenko@sysgears.com>",
   "main": "index.js",
