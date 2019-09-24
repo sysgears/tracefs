@@ -17,7 +17,7 @@ function traceFsCalls(traceSubstring, useConsole) {
     let hrTime = process.hrtime();
     startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
     try {
-      if (['watch', 'watchFile'].indexOf(this.method) >= 0) {
+      if (['watch', 'watchFile'].indexOf(this.method) >= 0 && arguments[0].indexOf(traceSubstring) >= 0) {
         const idx = ['undefined', 'function'].indexOf(typeof arguments[1]) >= 0 ? 1 : 2;
         const listener = arguments[idx];
         arguments[idx] = watchListener.bind({ method: this.method, filePath: arguments[0] });
