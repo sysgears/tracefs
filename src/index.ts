@@ -8,8 +8,9 @@ const TRIM_STR_LEN = 30;
 const dump = (chalk: Chalk, value: any, isFilename?: boolean): string => {
   if (typeof value === 'undefined') {
     return '';
-  }
-  if (typeof value === 'object' && value.message && value.stack) {
+  } else if (value === null) {
+    return chalk.blue(value);
+  } else if (typeof value === 'object' && value.message && value.stack) {
     return chalk.redBright(
       value.message.indexOf('ENOENT') >= 0 || value.message.indexOf('ENOTDIR') >= 0 ? value.message : value.stack
     );
