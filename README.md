@@ -12,15 +12,13 @@ npm install tracefs
 ```
 
 ```bash
-TRACEFS=/foo node -r tracefs myprog
+tracefs -e :pathSubstring node ./myscript
 ```
 
-And then check the output in
-`<tmpdir>/tracefs.log`
+or
 
-You can also prepend substring with `console:` if you want to log calls to console instead of temporary file:
 ```bash
-TRACEFS=console:/foo node -r tracefs myprog
+tracefs -e trace.log:pathSubstring node ./myscript
 ```
 
 ## License
