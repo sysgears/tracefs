@@ -21,6 +21,9 @@ or
 tracefs -e trace.log:pathSubstring node ./myscript
 ```
 
+Output example:
+![Alt text](/screenshot.png?raw=true "Output Example")
+
 ## License
 Copyright © 2019 [SysGears (Cyprus) Limited]. This source code is licensed under the [MIT] license.
 

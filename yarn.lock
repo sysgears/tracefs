@@ -101,6 +101,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/helper-module-transforms@npm:^7.4.4":
+  version: 7.5.5
+  resolution: "@babel/helper-module-transforms@npm:7.5.5"
+  dependencies:
+    "@babel/helper-module-imports": "npm:^7.0.0"
+    "@babel/helper-simple-access": "npm:^7.1.0"
+    "@babel/helper-split-export-declaration": "npm:^7.4.4"
+    "@babel/template": "npm:^7.4.4"
+    "@babel/types": "npm:^7.5.5"
+    lodash: "npm:^4.17.13"
+  checksum: 0b71228687009b88c3ff119c0767a03fd21286454a675c6dda9952d1753725e4108b038756a4077807ffdc7e3af5f4f8dd2f1496c5c18b08e6b842cf4d77abf6
+  languageName: node
+  linkType: hard
+
 "@babel/helper-optimise-call-expression@npm:^7.0.0":
   version: 7.0.0
   resolution: "@babel/helper-optimise-call-expression@npm:7.0.0"
@@ -126,6 +140,16 @@ __metadata:
     "@babel/traverse": "npm:^7.5.5"
     "@babel/types": "npm:^7.5.5"
   checksum: 4b3f817393b9a759d46f8616a788a4693654ad5dba75c39d73248766aac6fb17735d742da38554300662f37b8756a66ed329bafaa6f386277ebc8c98a01c3bb9
+  languageName: node
+  linkType: hard
+
+"@babel/helper-simple-access@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "@babel/helper-simple-access@npm:7.1.0"
+  dependencies:
+    "@babel/template": "npm:^7.1.0"
+    "@babel/types": "npm:^7.0.0"
+  checksum: 0004ef3e66fcb19d8379be2b6c8acff9326aa3a77585ef5ba74ad1a13534928fd1206a427b9b4b7ced4a951344deaafe7730e33eaffaf078cb5fd9aa46a23f55
   languageName: node
   linkType: hard
 
@@ -203,6 +227,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/plugin-transform-modules-commonjs@npm:7.6.0":
+  version: 7.6.0
+  resolution: "@babel/plugin-transform-modules-commonjs@npm:7.6.0"
+  dependencies:
+    "@babel/helper-module-transforms": "npm:^7.4.4"
+    "@babel/helper-plugin-utils": "npm:^7.0.0"
+    "@babel/helper-simple-access": "npm:^7.1.0"
+    babel-plugin-dynamic-import-node: "npm:^2.3.0"
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: b4c04a5abcd48623fea2744eff68fc65bc70d4bc68ead6db511875d5d00d875a759020cea4e348bc55b3622b8abf9d0bf29ae93651cf502e67145f73e3362a82
+  languageName: node
+  linkType: hard
+
 "@babel/plugin-transform-typescript@npm:^7.6.0":
   version: 7.6.3
   resolution: "@babel/plugin-transform-typescript@npm:7.6.3"
@@ -243,7 +281,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/template@npm:^7.1.0, @babel/template@npm:^7.4.0, @babel/template@npm:^7.6.0":
+"@babel/template@npm:^7.1.0, @babel/template@npm:^7.4.0, @babel/template@npm:^7.4.4, @babel/template@npm:^7.6.0":
   version: 7.6.0
   resolution: "@babel/template@npm:7.6.0"
   dependencies:
@@ -1064,6 +1102,15 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0
   checksum: 85b677c2e3e3bfb98a92fd7ffbddd25aef6592657db6d85e56abbea8b8df3f68a49607d5a609d50e171b12f5a52fa199a220814da6156e4de3d8e01974ff6318
+  languageName: node
+  linkType: hard
+
+"babel-plugin-dynamic-import-node@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "babel-plugin-dynamic-import-node@npm:2.3.0"
+  dependencies:
+    object.assign: "npm:^4.1.0"
+  checksum: 6a53db3aa75dbd13c102f13f6252eaedb8f3646f8f73153c3d147a0717c6816055e233b73127fe7d29bb17a5a8140e2bf425ae824e28cf89f5ca4a1d6e1658b4
   languageName: node
   linkType: hard
 
@@ -4537,7 +4584,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object-keys@npm:^1.0.12, object-keys@npm:^1.1.1":
+"object-keys@npm:^1.0.11, object-keys@npm:^1.0.12, object-keys@npm:^1.1.1":
   version: 1.1.1
   resolution: "object-keys@npm:1.1.1"
   checksum: 520e29aea8cde1e8862359e09831f21de4cdb8ad85d3c4a3223b258bf600b0b058d9b6635ffa51d91afec2f1cf51c62dd6eed6deb52b9d332f88c98e864d3845
@@ -4550,6 +4597,18 @@ __metadata:
   dependencies:
     isobject: "npm:^3.0.0"
   checksum: f0e29a4c6453a5613ca4ca4f534b4b0f1770726bd9d82b836aef208cfc26f8447c2e0bdf29839ef51c93003fd7bedfb3857067942e76b843ef4c04b1b6f7a860
+  languageName: node
+  linkType: hard
+
+"object.assign@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "object.assign@npm:4.1.0"
+  dependencies:
+    define-properties: "npm:^1.1.2"
+    function-bind: "npm:^1.1.1"
+    has-symbols: "npm:^1.0.0"
+    object-keys: "npm:^1.0.11"
+  checksum: 4d9f508c190f32772b3527918e000d401ca1e7b70dbfe697bd3820c1f181f582ea8c8419bb492e692c5ad39ae4b648e1172fa35f57ece7d869bee3a8b7983f23
   languageName: node
   linkType: hard
 
@@ -6154,6 +6213,7 @@ __metadata:
   dependencies:
     "@babel/core": "npm:^7.4.5"
     "@babel/plugin-proposal-class-properties": "npm:^7.4.4"
+    "@babel/plugin-transform-modules-commonjs": "npm:7.6.0"
     "@babel/preset-typescript": "npm:^7.3.3"
     "@babel/register": "npm:^7.5.5"
     "@types/node": "npm:^11.11.3"

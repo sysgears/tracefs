@@ -87,9 +87,9 @@ const traceFsCalls = (expr?: string) => {
               chalk.magenta((endTimeUs - startTimeUs).toFixed(1) + ' us ') +
               method +
               '(' +
-              args.map((x, idx) => dump(chalk, x, idx === 0)) +
+              args.map((x, idx) => dump(chalk, x, idx === 0)).join(', ') +
               ')->callback(' +
-              wargs.map(x => dump(chalk, x)) +
+              wargs.map(x => dump(chalk, x)).join(', ') +
               ')';
             if (!logFile) {
               console.log(msg);
@@ -113,7 +113,7 @@ const traceFsCalls = (expr?: string) => {
           chalk.magenta((endTimeUs - startTimeUs).toFixed(1) + ' us ') +
           method +
           '(' +
-          args.map((x, idx) => dump(chalk, x, idx === 0)) +
+          args.map((x, idx) => dump(chalk, x, idx === 0)).join(', ') +
           ')' +
           (result === undefined ? '' : ' => ' + dump(chalk, result));
         if (!logFile) {
@@ -130,7 +130,7 @@ const traceFsCalls = (expr?: string) => {
           chalk.magenta((endTimeUs - startTimeUs).toFixed(1) + ' us ') +
           method +
           '(' +
-          args.map((x, idx) => dump(chalk, x, idx === 0)) +
+          args.map((x, idx) => dump(chalk, x, idx === 0)).join(', ') +
           ') => ' +
           dump(chalk, e);
         if (!logFile) {
