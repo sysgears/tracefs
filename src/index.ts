@@ -78,7 +78,7 @@ const traceFsCalls = (expr?: string) => {
           startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
           try {
             if (listener) {
-              listener.apply(listener, args);
+              listener.apply(listener, wargs);
             }
           } finally {
             hrTime = process.hrtime();
