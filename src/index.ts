@@ -46,7 +46,7 @@ const dump = (chalk: Chalk, value: any, isFilename?: boolean): string => {
   }
 
   const str = util.inspect(value, { depth: null, maxArrayLength: null, breakLength: Infinity });
-  const result = str.length <= 255 ? str : str.slice(0, TRIM_STR_LEN) + "...'";
+  const result = isFilename || str.length <= 255 ? str : str.slice(0, TRIM_STR_LEN) + "...'";
 
   return isFilename ? chalk.green(result) : result;
 };
