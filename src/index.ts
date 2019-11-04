@@ -67,6 +67,9 @@ const traceFsCalls = (expr?: string) => {
       }
     }
   }
+  if (logFile) {
+    fs.writeFileSync(logFile, '');
+  }
   const chalk = new chalkModule.constructor({ enabled: !logFile });
   const realFs = { ...fs };
 
