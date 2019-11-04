@@ -5,9 +5,14 @@ import crossSpawn from 'cross-spawn';
 
 const TRIM_STR_LEN = 30;
 
-const dump = (chalk: Chalk, value: any, isFilename?: boolean): string => {
+interface Options {
+  isFilename?: boolean;
+  isResult?: boolean;
+}
+
+const dump = (chalk: Chalk, value: any, options: Options = {}): string => {
   if (typeof value === 'undefined') {
-    return '';
+    return options.isResult ? '' : '' + value;
   } else if (value === null) {
     return chalk.blue('' + value);
   } else if (typeof value === 'object' && value.message && value.stack) {
@@ -37,7 +42,7 @@ const dump = (chalk: Chalk, value: any, isFilename?: boolean): string => {
     return value ? chalk.green('' + value) : chalk.red('' + value);
   } else if (typeof value === 'number') {
     return chalk.yellow('' + value);
-  } else if (!isFilename && (Buffer.isBuffer(value) || typeof value === 'string')) {
+  } else if (!options.isFilename && (Buffer.isBuffer(value) || typeof value === 'string')) {
     const str = value.toString().replace(/[\n\r]/g, '');
     const result = "'" + (str.length <= 255 ? str : str.slice(0, TRIM_STR_LEN) + '...') + "'";
     return chalk.cyan(result);
@@ -46,9 +51,9 @@ const dump = (chalk: Chalk, value: any, isFilename?: boolean): string => {
   }
 
   const str = util.inspect(value, { depth: null, maxArrayLength: null, breakLength: Infinity });
-  const result = isFilename || str.length <= 255 ? str : str.slice(0, TRIM_STR_LEN) + "...'";
+  const result = options.isFilename || str.length <= 255 ? str : str.slice(0, TRIM_STR_LEN) + "...'";
 
-  return isFilename ? chalk.green(result) : result;
+  return options.isFilename ? chalk.green(result) : result;
 };
 
 const traceFsCalls = (expr?: string) => {
@@ -65,6 +70,35 @@ const traceFsCalls = (expr?: string) => {
   const chalk = new chalkModule.constructor({ enabled: !logFile });
   const realFs = { ...fs };
 
+  const interceptedCallback = (method: string, args: any[], callback: (...wargs: any[]) => any, cargs: any[]) => {
+    let hrTime = process.hrtime();
+    let startTimeUs, endTimeUs;
+    startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
+    let result;
+    try {
+      if (callback) {
+        result = callback(...cargs);
+      }
+    } finally {
+      hrTime = process.hrtime();
+      endTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
+      const msg =
+        chalk.magenta((endTimeUs - startTimeUs).toFixed(1) + ' us ') +
+        method +
+        '(' +
+        args.map((x, idx) => dump(chalk, x, { isFilename: idx === 0 })).join(', ') +
+        ')->(' +
+        cargs.map(x => dump(chalk, x)).join(', ') +
+        ')' +
+        (result === undefined ? '' : ' => ' + dump(chalk, result, { isResult: true }));
+      if (!logFile) {
+        console.log(msg);
+      } else {
+        realFs.appendFileSync(logFile, msg + '\n');
+      }
+    }
+  };
+
   const traceFsProxy = (method: string, ...args: any[]) => {
     let hrTime = process.hrtime();
     let startTimeUs, endTimeUs;
@@ -73,34 +107,13 @@ const traceFsCalls = (expr?: string) => {
       if (['watch', 'watchFile'].indexOf(method) >= 0 && (!traceSubstring || args[0].indexOf(traceSubstring) >= 0)) {
         const idx = ['undefined', 'function'].indexOf(typeof args[1]) >= 0 ? 1 : 2;
         const listener = args[idx];
-        const watchListener = (...wargs) => {
-          let hrTime = process.hrtime();
-          startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
-          try {
-            if (listener) {
-              listener.apply(listener, wargs);
-            }
-          } finally {
-            hrTime = process.hrtime();
-            endTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
-            const msg =
-              chalk.magenta((endTimeUs - startTimeUs).toFixed(1) + ' us ') +
-              method +
-              '(' +
-              args.map((x, idx) => dump(chalk, x, idx === 0)).join(', ') +
-              ')->callback(' +
-              wargs.map(x => dump(chalk, x)).join(', ') +
-              ')';
-            if (!logFile) {
-              console.log(msg);
-            } else {
-              realFs.appendFileSync(logFile, msg + '\n');
-            }
-          }
-        };
+        const watchListener = (...cargs) => interceptedCallback(method, args, listener, cargs);
         args[idx] = (...wargs) => watchListener(...wargs);
       }
-      const result = realFs[method].apply(realFs, args);
+      const newArgs = args.map(x =>
+        typeof x !== 'function' ? x : (...cargs) => interceptedCallback(method, args, x, cargs)
+      );
+      const result = realFs[method].apply(realFs, newArgs);
       if (
         args.length > 0 &&
         typeof args[0] === 'string' &&
@@ -113,9 +126,9 @@ const traceFsCalls = (expr?: string) => {
           chalk.magenta((endTimeUs - startTimeUs).toFixed(1) + ' us ') +
           method +
           '(' +
-          args.map((x, idx) => dump(chalk, x, idx === 0)).join(', ') +
+          args.map((x, idx) => dump(chalk, x, { isFilename: idx === 0 })).join(', ') +
           ')' +
-          (result === undefined ? '' : ' => ' + dump(chalk, result));
+          (result === undefined ? '' : ' => ' + dump(chalk, result, { isResult: true }));
         if (!logFile) {
           console.log(msg);
         } else {
@@ -130,7 +143,7 @@ const traceFsCalls = (expr?: string) => {
           chalk.magenta((endTimeUs - startTimeUs).toFixed(1) + ' us ') +
           method +
           '(' +
-          args.map((x, idx) => dump(chalk, x, idx === 0)).join(', ') +
+          args.map((x, idx) => dump(chalk, x, { isFilename: idx === 0 })).join(', ') +
           ') => ' +
           dump(chalk, e);
         if (!logFile) {
@@ -174,7 +187,7 @@ const run = (name, argv) => {
   });
 };
 
-if (require.main === module) {
+export const runCli = () => {
   const [, , name, ...rest] = process.argv;
 
   if (name === `--help` || name === `-h`) {
@@ -187,6 +200,10 @@ if (require.main === module) {
   } else {
     help(true);
   }
+};
+
+if (require.main === module) {
+  runCli();
 } else {
   traceFsCalls(process.env.TRACEFS);
 }

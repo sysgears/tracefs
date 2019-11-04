@@ -11,4 +11,7 @@ require(`@babel/register`)({
   only: [p => p.startsWith(root)]
 });
 
-module.exports = require('./index');
+const tracefs = require('./index');
+tracefs.runCli();
+
+module.exports = tracefs;
