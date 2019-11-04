@@ -110,9 +110,14 @@ const traceFsCalls = (expr?: string) => {
         const watchListener = (...cargs) => interceptedCallback(method, args, listener, cargs);
         args[idx] = (...wargs) => watchListener(...wargs);
       }
-      const newArgs = args.map(x =>
-        typeof x !== 'function' ? x : (...cargs) => interceptedCallback(method, args, x, cargs)
-      );
+      let newArgs;
+      if (args.length > 0 && typeof args[0] === 'string' && (!traceSubstring || args[0].indexOf(traceSubstring)) >= 0) {
+        newArgs = args.map(x =>
+          typeof x !== 'function' ? x : (...cargs) => interceptedCallback(method, args, x, cargs)
+        );
+      } else {
+        newArgs = args;
+      }
       const result = realFs[method].apply(realFs, newArgs);
       if (
         args.length > 0 &&
