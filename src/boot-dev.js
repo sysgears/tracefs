@@ -2,9 +2,7 @@
 
 require('../.pnp.js').setup();
 
-const tsNode = require
-  .resolve('ts-node/register/transpile-only')
-  .replace(/\\/g, '/');
+const tsNode = require.resolve('ts-node/register/transpile-only').replace(/\\/g, '/');
 
 require(tsNode);
 

@@ -29,7 +29,11 @@ const dump = (chalk: Chalk, value: any, options: Options = {}): string => {
       util.inspect(
         Object.assign(
           {},
-          { _isFile: value.isFile(), _isDirectory: value.isDirectory(), _isSymlink: value.isSymbolicLink() },
+          {
+            _isFile: value.isFile(),
+            _isDirectory: value.isDirectory(),
+            _isSymlink: value.isSymbolicLink(),
+          },
           value
         ),
         { depth: null, breakLength: Infinity }
@@ -50,7 +54,11 @@ const dump = (chalk: Chalk, value: any, options: Options = {}): string => {
     return chalk.blueBright(util.inspect(value, { depth: null, breakLength: Infinity }));
   }
 
-  const str = util.inspect(value, { depth: null, maxArrayLength: null, breakLength: Infinity });
+  const str = util.inspect(value, {
+    depth: null,
+    maxArrayLength: null,
+    breakLength: Infinity,
+  });
   const result = options.isFilename || str.length <= 255 ? str : str.slice(0, TRIM_STR_LEN) + "...'";
 
   return options.isFilename ? chalk.green(result) : result;
@@ -59,7 +67,7 @@ const dump = (chalk: Chalk, value: any, options: Options = {}): string => {
 const traceFsCalls = (expr?: string) => {
   let logFile, traceSubstring;
   if (expr) {
-    const parts = expr.split(':').map(x => x.trim());
+    const parts = expr.split(':').map((x) => x.trim());
     if (parts.length >= 1) {
       logFile = parts[0].length > 0 ? parts[0] : undefined;
       if (parts.length > 1) {
@@ -91,7 +99,7 @@ const traceFsCalls = (expr?: string) => {
         '(' +
         args.map((x, idx) => dump(chalk, x, { isFilename: idx === 0 })).join(', ') +
         ')->(' +
-        cargs.map(x => dump(chalk, x)).join(', ') +
+        cargs.map((x) => dump(chalk, x)).join(', ') +
         ')' +
         (result === undefined ? '' : ' => ' + dump(chalk, result, { isResult: true }));
       if (!logFile) {
@@ -115,7 +123,7 @@ const traceFsCalls = (expr?: string) => {
       }
       let newArgs;
       if (args.length > 0 && typeof args[0] === 'string' && (!traceSubstring || args[0].indexOf(traceSubstring)) >= 0) {
-        newArgs = args.map(x =>
+        newArgs = args.map((x) =>
           typeof x !== 'function' ? x : (...cargs) => interceptedCallback(method, args, x, cargs)
         );
       } else {
@@ -165,13 +173,13 @@ const traceFsCalls = (expr?: string) => {
     }
   };
 
-  const fsMethods = Object.keys(fs).filter(key => key[0] === key[0].toLowerCase() && typeof fs[key] === 'function');
-  fsMethods.forEach(method => {
+  const fsMethods = Object.keys(fs).filter((key) => key[0] === key[0].toLowerCase() && typeof fs[key] === 'function');
+  fsMethods.forEach((method) => {
     fs[method] = (...args) => traceFsProxy(method, ...args);
   });
 };
 
-const help = error => {
+const help = (error) => {
   const logFn = error ? console.error : console.log;
   process.exitCode = error ? 1 : 0;
 
@@ -187,10 +195,10 @@ const run = (name, argv) => {
 
   const child = crossSpawn(name, argv, {
     env: { ...process.env, NODE_OPTIONS },
-    stdio: `inherit`
+    stdio: `inherit`,
   });
 
-  child.on(`exit`, code => {
+  child.on(`exit`, (code) => {
     process.exitCode = code !== null ? code : 1;
   });
 };

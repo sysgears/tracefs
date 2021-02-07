@@ -7,20 +7,12 @@
       "modules": true
     }
   },
-  "plugins": [
-    "@typescript-eslint/eslint-plugin",
-    "prettier",
-  ],
+  "plugins": ["@typescript-eslint/eslint-plugin", "prettier"],
   "env": {
     "node": true,
     "jest": true
   },
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier",
-    "prettier/@typescript-eslint"
-  ],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier", "prettier/@typescript-eslint"],
   "rules": {
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/explicit-function-return-type": 0,
@@ -40,15 +32,20 @@
     ]
   },
   "settings": {
-    "@typescript-eslint/camelcase": ["error", {"allow": ["__non_webpack_module__", "__non_webpack_require__", "^npm(_[a-z]+)+$"]}],
+    "@typescript-eslint/camelcase": [
+      "error",
+      {
+        "allow": ["__non_webpack_module__", "__non_webpack_require__", "^npm(_[a-z]+)+$"]
+      }
+    ],
     "@typescript-eslint/class-name-casing": 2,
-    "@typescript-eslint/indent": ["error", 2, {"SwitchCase": 1}],
-    "@typescript-eslint/no-unused-vars": [2, {"args": "none", "ignoreRestSiblings": true}],
+    "@typescript-eslint/indent": ["error", 2, { "SwitchCase": 1 }],
+    "@typescript-eslint/no-unused-vars": [2, { "args": "none", "ignoreRestSiblings": true }],
     "array-bracket-spacing": 2,
     "arrow-spacing": 2,
     "comma-dangle": ["error", "always-multiline"],
     "computed-property-spacing": 2,
-    "generator-star-spacing": ["error", {"before": true, "after": true}],
+    "generator-star-spacing": ["error", { "before": true, "after": true }],
     "keyword-spacing": 2,
     "no-multiple-empty-lines": 2,
     "no-tabs": 2,
