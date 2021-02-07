@@ -26,7 +26,4 @@ Output example:
 
 ## License
 
-Copyright © 2019 [SysGears (Cyprus) Limited]. This source code is licensed under the [MIT] license.
-
-[mit]: LICENSE
-[sysgears (cyprus) limited]: http://sysgears.com
+Copyright © 2019 [SysGears (Cyprus) Limited](http://sysgears.com). This source code is licensed under the [MIT](LICENSE) license.
