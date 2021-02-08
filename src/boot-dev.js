@@ -2,14 +2,11 @@
 
 require('../.pnp.js').setup();
 
-const path = require(`path`);
-const root = path.dirname(__dirname);
+const tsNode = require.resolve('ts-node/register/transpile-only').replace(/\\/g, '/');
 
-require(`@babel/register`)({
-  root,
-  extensions: [`.tsx`, `.ts`],
-  only: [p => p.startsWith(root)]
-});
+require(tsNode);
+
+process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} -r "${tsNode}"`;
 
 const tracefs = require('./index');
 tracefs.runCli();
