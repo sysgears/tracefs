@@ -118,7 +118,16 @@ const traceFsCalls = (expr?: string) => {
     }
   };
 
+  const ignoreAccessSet = new Set<string | number>();
+
   const traceFsProxy = (method: string, ...args: any[]) => {
+    // Calls to 'exists' is just a wrapper for 'access' so calls to 'access'
+    // right after a call to 'exists' can be ignored
+    if (method === 'access' && args.length > 0 && ignoreAccessSet.has(args[0])) {
+      ignoreAccessSet.delete(args[0]);
+      return realFs[method].apply(realFs, args as any);
+    }
+
     let hrTime = process.hrtime();
     let startTimeUs, endTimeUs;
     startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
@@ -144,6 +153,10 @@ const traceFsCalls = (expr?: string) => {
         });
       } else {
         newArgs = args;
+      }
+
+      if (method === 'exists' && args.length > 0) {
+        ignoreAccessSet.add(args[0]);
       }
 
       const result = realFs[method].apply(realFs, newArgs);
@@ -180,6 +193,10 @@ const traceFsCalls = (expr?: string) => {
       }
       return result;
     } catch (e) {
+      if (method === 'exists' && args.length > 0) {
+        ignoreAccessSet.delete(args[0]);
+      }
+
       if (typeof arg0 === 'string' && (!traceSubstring || arg0.indexOf(traceSubstring)) >= 0) {
         endTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
         const msg =
