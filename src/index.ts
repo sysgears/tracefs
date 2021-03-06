@@ -65,6 +65,8 @@ const dump = (chalk: Chalk, value: any, options: Options = {}): string => {
 };
 
 const traceFsCalls = (expr?: string) => {
+  const fdMap = new Map<number, string>();
+
   let logFile, traceSubstring;
   if (expr) {
     const parts = expr.split(':').map((x) => x.trim());
@@ -82,6 +84,12 @@ const traceFsCalls = (expr?: string) => {
   const realFs = { ...fs };
 
   const interceptedCallback = (method: string, args: any[], callback: (...wargs: any[]) => any, cargs: any[]) => {
+    if (method === 'open' && typeof cargs[1] === 'number') {
+      fdMap.set(cargs[1], args[0]);
+    } else if (method === 'close' && typeof args[0] === 'number' && cargs[0] === null) {
+      fdMap.delete(args[0]);
+    }
+
     let hrTime = process.hrtime();
     let startTimeUs, endTimeUs;
     startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
@@ -114,6 +122,9 @@ const traceFsCalls = (expr?: string) => {
     let hrTime = process.hrtime();
     let startTimeUs, endTimeUs;
     startTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
+
+    const arg0 = args.length > 0 ? (typeof args[0] === 'number' ? fdMap.get(args[0]) : args[0]) : null;
+
     try {
       if (['watch', 'watchFile'].indexOf(method) >= 0 && (!traceSubstring || args[0].indexOf(traceSubstring) >= 0)) {
         const idx = ['undefined', 'function'].indexOf(typeof args[1]) >= 0 ? 1 : 2;
@@ -122,7 +133,7 @@ const traceFsCalls = (expr?: string) => {
         args[idx] = (...wargs) => watchListener(...wargs);
       }
       let newArgs;
-      if (args.length > 0 && typeof args[0] === 'string' && (!traceSubstring || args[0].indexOf(traceSubstring)) >= 0) {
+      if (typeof arg0 === 'string' && (!traceSubstring || arg0.indexOf(traceSubstring)) >= 0) {
         newArgs = args.map((x) =>
           typeof x !== 'function' ? x : (...cargs) => interceptedCallback(method, args, x, cargs)
         );
@@ -130,11 +141,17 @@ const traceFsCalls = (expr?: string) => {
         newArgs = args;
       }
       const result = realFs[method].apply(realFs, newArgs);
+
+      if (method === 'openSync' && typeof result === 'number') {
+        fdMap.set(result, newArgs[0]);
+      } else if (method === 'closeSync' && typeof newArgs[0] === 'number') {
+        fdMap.delete(newArgs[0]);
+      }
+
       if (
-        args.length > 0 &&
-        typeof args[0] === 'string' &&
-        args[0].indexOf(logFile) < 0 &&
-        (!traceSubstring || args[0].indexOf(traceSubstring) >= 0)
+        typeof arg0 === 'string' &&
+        arg0.indexOf(logFile) < 0 &&
+        (!traceSubstring || arg0.indexOf(traceSubstring) >= 0)
       ) {
         hrTime = process.hrtime();
         endTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
@@ -153,7 +170,7 @@ const traceFsCalls = (expr?: string) => {
       }
       return result;
     } catch (e) {
-      if (args.length > 0 && typeof args[0] === 'string' && (!traceSubstring || args[0].indexOf(traceSubstring)) >= 0) {
+      if (typeof arg0 === 'string' && (!traceSubstring || arg0.indexOf(traceSubstring)) >= 0) {
         endTimeUs = hrTime[0] * 1000000 + hrTime[1] / 1000;
         const msg =
           chalk.magenta((endTimeUs - startTimeUs).toFixed(1) + ' us ') +
