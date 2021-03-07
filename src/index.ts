@@ -133,14 +133,24 @@ const traceFsCalls = (expr?: string) => {
         args[idx] = (...wargs) => watchListener(...wargs);
       }
       let newArgs;
+      let hasCallback = false;
       if (typeof arg0 === 'string' && (!traceSubstring || arg0.indexOf(traceSubstring)) >= 0) {
-        newArgs = args.map((x) =>
-          typeof x !== 'function' ? x : (...cargs) => interceptedCallback(method, args, x, cargs)
-        );
+        newArgs = args.map((x) => {
+          if (typeof x !== 'function') {
+            return x;
+          }
+          hasCallback = true;
+          return (...cargs) => interceptedCallback(method, args, x, cargs);
+        });
       } else {
         newArgs = args;
       }
+
       const result = realFs[method].apply(realFs, newArgs);
+
+      if (hasCallback) {
+        return result;
+      }
 
       if (method === 'openSync' && typeof result === 'number') {
         fdMap.set(result, newArgs[0]);
