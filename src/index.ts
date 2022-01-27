@@ -81,9 +81,14 @@ const traceFsCalls = (expr?: string) => {
     fs.writeFileSync(logFile, '');
   }
   const chalk = new chalkModule.constructor({ enabled: !logFile });
-  const realFs = { ...fs };
 
-  const interceptedCallback = (method: string, args: any[], callback: (...wargs: any[]) => any, cargs: any[]) => {
+  const interceptedCallback = (
+    realAppendFileSync: any,
+    method: string,
+    args: any[],
+    callback: (...wargs: any[]) => any,
+    cargs: any[]
+  ) => {
     if (method === 'open' && typeof cargs[1] === 'number') {
       fdMap.set(cargs[1], args[0]);
     } else if (method === 'close' && typeof args[0] === 'number' && cargs[0] === null) {
@@ -113,14 +118,14 @@ const traceFsCalls = (expr?: string) => {
       if (!logFile) {
         console.log(msg);
       } else {
-        realFs.appendFileSync(logFile, msg + '\n');
+        realAppendFileSync(logFile, msg + '\n');
       }
     }
   };
 
   const ignoreAccessSet = new Set<string | number>();
 
-  const traceFsProxy = (method: string, ...args: any[]) => {
+  const traceFsProxy = (realAppendFileSync: any, realFs: any, method: string, ...args: any[]) => {
     // Calls to 'exists' is just a wrapper for 'access' so calls to 'access'
     // right after a call to 'exists' can be ignored
     if (method === 'access' && args.length > 0 && ignoreAccessSet.has(args[0])) {
@@ -138,7 +143,7 @@ const traceFsCalls = (expr?: string) => {
       if (['watch', 'watchFile'].indexOf(method) >= 0 && (!traceSubstring || args[0].indexOf(traceSubstring) >= 0)) {
         const idx = ['undefined', 'function'].indexOf(typeof args[1]) >= 0 ? 1 : 2;
         const listener = args[idx];
-        const watchListener = (...cargs) => interceptedCallback(method, args, listener, cargs);
+        const watchListener = (...cargs) => interceptedCallback(realAppendFileSync, method, args, listener, cargs);
         args[idx] = (...wargs) => watchListener(...wargs);
       }
       let newArgs;
@@ -149,7 +154,7 @@ const traceFsCalls = (expr?: string) => {
             return x;
           }
           hasCallback = true;
-          return (...cargs) => interceptedCallback(method, args, x, cargs);
+          return (...cargs) => interceptedCallback(realAppendFileSync, method, args, x, cargs);
         });
       } else {
         newArgs = args;
@@ -188,7 +193,7 @@ const traceFsCalls = (expr?: string) => {
         if (!logFile) {
           console.log(msg);
         } else {
-          realFs.appendFileSync(logFile, msg + '\n');
+          realAppendFileSync(logFile, msg + '\n');
         }
       }
       return result;
@@ -209,7 +214,7 @@ const traceFsCalls = (expr?: string) => {
         if (!logFile) {
           console.log(msg);
         } else {
-          realFs.appendFileSync(logFile, msg + '\n');
+          realAppendFileSync(logFile, msg + '\n');
         }
       }
 
@@ -218,9 +223,21 @@ const traceFsCalls = (expr?: string) => {
   };
 
   const fsMethods = Object.keys(fs).filter((key) => key[0] === key[0].toLowerCase() && typeof fs[key] === 'function');
+  const realFsObject = { ...fs };
   fsMethods.forEach((method) => {
-    fs[method] = (...args) => traceFsProxy(method, ...args);
+    fs[method] = (...args) => traceFsProxy(realFsObject['appendFileSync'], realFsObject, method, ...args);
   });
+  const fsPromises = fs['promises'];
+  const realFsPromisesObject = { ...fsPromises };
+  if (fsPromises) {
+    const fsPromiseMethods = Object.keys(fsPromises).filter(
+      (key) => key[0] === key[0].toLowerCase() && typeof fs[key] === 'function'
+    );
+    fsPromiseMethods.forEach((method) => {
+      fsPromises[method] = (...args) =>
+        traceFsProxy(realFsObject['appendFileSync'], realFsPromisesObject, method, ...args);
+    });
+  }
 };
 
 const help = (error) => {
